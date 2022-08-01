@@ -5,10 +5,10 @@ import java.util.*;
 public class JokeServer {
     public static final int PORT = 4444;
     public static final String[] JOKE_STRINGS = new String[] {
-            "What did the cheese say when it looked in the mirror? \"Hello-me (Halloumi)\"",
-            "What kind of cheese do you use to disguise a small horse? Whatever kind of cheese is big enough to fit a small horse inside",
-            "Why did the doctor get fired from his job? He lost his patience(Patients).",
-            "what do you call a fake noodle? An Impasta."
+            "What did the cheese say when it looked in the mirror?\n\"Hello-me (Halloumi)\"\n",
+            "What kind of cheese do you use to disguise a small horse?\nWhatever kind of cheese is big enough to fit a small horse inside\n",
+            "Why did the doctor get fired from his job?\nHe lost his patience(Patients).\n",
+            "what do you call a fake noodle? An Impasta.\n"
     };
 
     ServerSocket serverSocket;
@@ -31,7 +31,7 @@ public class JokeServer {
             Socket clientSocket = serverSocket.accept();
             DataInputStream in = new DataInputStream(clientSocket.getInputStream());
             DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream());
-            ClientHandler client = new ClientHandler(this, clientSocket, in, out);
+            ClientHandler client = new ClientHandler(this, clients.size(), clientSocket, in, out);
             clients.add(client);
             client.start();
         }

@@ -3,13 +3,16 @@ import java.net.*;
 
 public class ClientHandler extends Thread {
     JokeServer server;
+    int clientId;
     Socket clientSocket;
     DataInputStream in;
     DataOutputStream out;
     boolean running = true;
 
-    public ClientHandler(JokeServer server, Socket clientSocket, DataInputStream in, DataOutputStream out) {
+    public ClientHandler(JokeServer server, int clientId, Socket clientSocket, DataInputStream in,
+            DataOutputStream out) {
         this.server = server;
+        this.clientId = clientId;
         this.clientSocket = clientSocket;
         this.in = in;
         this.out = out;
@@ -17,11 +20,16 @@ public class ClientHandler extends Thread {
 
     @Override
     public void run() {
+        // welcome message
+        String message = "[Client: " + clientId + "] has connected to Joke Server["
+                + server.serverSocket.getInetAddress().getHostAddress() + ":" + server.serverSocket.getLocalPort()
+                + "]";
         while (running) {
             try {
-                out.writeUTF("Do you want to hear a joke? Y/N");
+                message += "\nDo you want to hear a joke? (Y/N)";
+                out.writeUTF(message);
                 String response = in.readUTF().toUpperCase();
-                handleInput(response);
+                message = handleInput(response);
             } catch (Exception e) {
                 // client disconnected
                 running = false;
@@ -35,21 +43,14 @@ public class ClientHandler extends Thread {
         }
     }
 
-    private void handleInput(String input) {
-        try {
-            switch (input) {
-                case "Y":
-                    out.writeUTF(server.getRandomJoke());
-                    break;
-                case "N":
-                    out.writeUTF("Bye!");
-                    break;
-                default:
-                    out.writeUTF("Invalid input!");
-                    break;
-            }
-        } catch (Exception e) {
-            System.out.println("Handle input Error: " + e.getMessage());
+    private String handleInput(String input) {
+        switch (input) {
+            case "Y":
+                return server.getRandomJoke();
+            case "N":
+                return "Bye!";
+            default:
+                return "Invalid input!";
         }
     }
 
