@@ -49,7 +49,7 @@ public class JokeClient {
     /**
      * Gets output from the server and sends input back to the server.
      */
-    private void run() {
+    public void run() {
         running = true;
         while (running) {
             try {
@@ -72,7 +72,6 @@ public class JokeClient {
         }
         // close connection and clean up resources
         try {
-            clientSocket.close();
             scanner.close();
             serverOutput.close();
             clientInput.close();
@@ -82,7 +81,7 @@ public class JokeClient {
         }
     }
 
-    private void stop() {
+    public void stop() {
         running = false;
     }
 

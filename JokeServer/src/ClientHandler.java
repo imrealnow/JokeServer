@@ -23,15 +23,15 @@ public class ClientHandler extends Thread {
                 String response = in.readUTF().toUpperCase();
                 handleInput(response);
             } catch (Exception e) {
-                System.out.println("Error: " + e.getMessage());
+                // client disconnected
+                running = false;
             }
         }
         try {
             out.close();
             in.close();
-            clientSocket.close();
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("Handler close Error: " + e.getMessage());
         }
     }
 
@@ -49,7 +49,7 @@ public class ClientHandler extends Thread {
                     break;
             }
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("Handle input Error: " + e.getMessage());
         }
     }
 

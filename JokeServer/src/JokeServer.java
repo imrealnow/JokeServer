@@ -4,7 +4,7 @@ import java.util.*;
 
 public class JokeServer {
     public static final int PORT = 4444;
-    static final String[] JOKE_STRINGS = new String[] {
+    public static final String[] JOKE_STRINGS = new String[] {
             "What did the cheese say when it looked in the mirror? \"Hello-me (Halloumi)\"",
             "What kind of cheese do you use to disguise a small horse? Whatever kind of cheese is big enough to fit a small horse inside",
             "Why did the doctor get fired from his job? He lost his patience(Patients).",
@@ -38,6 +38,7 @@ public class JokeServer {
     }
 
     public void disconnect() throws Exception {
+        running = false;
         for (ClientHandler client : clients) {
             client.stopHandler();
         }
