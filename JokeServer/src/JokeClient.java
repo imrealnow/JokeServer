@@ -34,10 +34,10 @@ public class JokeClient {
      */
     public void startConnection(String host, int port)
             throws UnknownHostException, IOException, IllegalArgumentException {
+        scanner = new Scanner(System.in);
         clientSocket = new Socket(host, port);
         serverOutput = new DataInputStream(clientSocket.getInputStream());
         clientInput = new DataOutputStream(clientSocket.getOutputStream());
-        scanner = new Scanner(System.in);
     }
 
     /**
@@ -46,6 +46,7 @@ public class JokeClient {
      * the user is asked to try again.
      */
     private void attemptConnection() {
+        scanner = new Scanner(System.in);
         boolean connected = false;
         String host = "";
         while (!connected) {
