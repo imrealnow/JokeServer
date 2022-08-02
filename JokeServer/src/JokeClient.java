@@ -92,8 +92,14 @@ public class JokeClient {
         clientInput = new DataOutputStream(clientSocket.getOutputStream());
     }
 
-    public String SendMessage(String msg) throws Exception {
+    public String sendMessage(String msg) throws Exception {
         clientInput.writeUTF(msg);
+        String response = serverOutput.readUTF();
+        System.out.println(response);
+        return response;
+    }
+
+    public String readMessage() throws Exception {
         String response = serverOutput.readUTF();
         System.out.println(response);
         return response;
