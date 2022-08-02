@@ -18,6 +18,10 @@ public class ClientHandler extends Thread {
         this.out = out;
     }
 
+    public Socket getSocket() {
+        return clientSocket;
+    }
+
     @Override
     public void run() {
         // welcome message
@@ -36,6 +40,7 @@ public class ClientHandler extends Thread {
             }
         }
         try {
+            server.disconnectClient(clientId);
             out.close();
             in.close();
         } catch (Exception e) {

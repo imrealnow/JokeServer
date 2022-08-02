@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public class JokeClient {
     Scanner scanner;
@@ -10,15 +11,33 @@ public class JokeClient {
 
     final String EXIT_COMMAND = "N";
     boolean running = false;
-
-    public JokeClient() {
-        scanner = new Scanner(System.in);
-    }
+    CompletableFuture<Boolean> disconnected = new CompletableFuture<>();
 
     public static void main(String[] args) throws Exception {
         JokeClient client = new JokeClient();
         client.attemptConnection();
         client.run();
+    }
+
+    public CompletableFuture<Boolean> getDisconnected() {
+        return disconnected;
+    }
+
+    /**
+     * Starts a connection to the server.
+     * 
+     * @param host the server's hostname
+     * @param port the server's port number
+     * @throws IOException              if the connection fails
+     * @throws IllegalArgumentException if the port number is invalid
+     * @throws UnknownHostException     if the hostname is invalid
+     */
+    public void startConnection(String host, int port)
+            throws UnknownHostException, IOException, IllegalArgumentException {
+        clientSocket = new Socket(host, port);
+        serverOutput = new DataInputStream(clientSocket.getInputStream());
+        clientInput = new DataOutputStream(clientSocket.getOutputStream());
+        scanner = new Scanner(System.in);
     }
 
     /**
@@ -72,10 +91,7 @@ public class JokeClient {
         }
         // close connection and clean up resources
         try {
-            scanner.close();
-            serverOutput.close();
-            clientInput.close();
-            System.out.println("Closed");
+            disconnect();
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
@@ -85,20 +101,12 @@ public class JokeClient {
         running = false;
     }
 
-    /**
-     * Starts a connection to the server.
-     * 
-     * @param host the server's hostname
-     * @param port the server's port number
-     * @throws IOException              if the connection fails
-     * @throws IllegalArgumentException if the port number is invalid
-     * @throws UnknownHostException     if the hostname is invalid
-     */
-    public void startConnection(String host, int port)
-            throws UnknownHostException, IOException, IllegalArgumentException {
-        clientSocket = new Socket(host, port);
-        serverOutput = new DataInputStream(clientSocket.getInputStream());
-        clientInput = new DataOutputStream(clientSocket.getOutputStream());
+    public void disconnect() throws IOException {
+        scanner.close();
+        serverOutput.close();
+        clientInput.close();
+        disconnected.complete(true);
+        System.out.println("Closed");
     }
 
     /**

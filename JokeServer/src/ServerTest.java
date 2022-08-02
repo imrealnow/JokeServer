@@ -2,6 +2,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Test;
 
 public class ServerTest {
@@ -37,6 +40,45 @@ public class ServerTest {
             String response = client.readMessage();
             assertEquals("[Client: 0] has connected to Joke Server[0.0.0.0:4444]\nDo you want to hear a joke? (Y/N)",
                     response);
+        } catch (Exception e) {
+            fail(e);
+        }
+    }
+
+    @Test
+    public void clientCanDisconnect() throws Exception {
+        try {
+            var serverThread = new Runnable() {
+                JokeServer server;
+
+                @Override
+                public void run() {
+                    try {
+                        server = new JokeServer();
+                        server.start("localhost", 4444);
+                        server.listenForClients();
+                        server.listenForClients();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        fail("Server failed to start");
+                    }
+                }
+
+                public JokeServer getServer() {
+                    return server;
+                }
+            };
+            Thread thread = new Thread(serverThread);
+            thread.start();
+            JokeClient client = new JokeClient();
+            client.startConnection("localhost", 4444);
+            client.disconnect();
+            JokeServer server = serverThread.getServer();
+            server.registerDisconnectListener(() -> {
+                List<String> serverLog = server.getConsoleLog();
+                assertTrue(serverLog.get(serverLog.size() - 1).startsWith("[Client 0 has disconnected"),
+                        "Client did not disconnect");
+            });
         } catch (Exception e) {
             fail(e);
         }

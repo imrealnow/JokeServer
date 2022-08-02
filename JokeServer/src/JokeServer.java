@@ -13,12 +13,26 @@ public class JokeServer {
 
     ServerSocket serverSocket;
     List<ClientHandler> clients = new ArrayList<ClientHandler>();
+    List<String> consoleLog = new ArrayList<String>();
+    List<Runnable> disconnectListeners = new ArrayList<Runnable>();
     boolean running = false;
 
     public static void main(String[] args) throws Exception {
         JokeServer server = new JokeServer();
         server.start("localhost", PORT);
         server.listenForClients();
+    }
+
+    public List<String> getConsoleLog() {
+        return Collections.unmodifiableList(consoleLog);
+    }
+
+    public void registerDisconnectListener(Runnable listener) {
+        disconnectListeners.add(listener);
+    }
+
+    public void deregisterDisconnectListener(Runnable listener) {
+        disconnectListeners.remove(listener);
     }
 
     public void start(String host, int port) throws Exception {
@@ -31,14 +45,18 @@ public class JokeServer {
      * @throws IOException if an I/O error occurs when waiting for a connection.
      */
     public void listenForClients() throws IOException {
+        printToConsole("=== JokeServer running on:" + getPublicIPAddress() + ":" + PORT + " ===");
         running = true;
         while (running) {
             Socket clientSocket = serverSocket.accept();
             DataInputStream in = new DataInputStream(clientSocket.getInputStream());
             DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream());
-            ClientHandler client = new ClientHandler(this, clients.size(), clientSocket, in, out);
+            int clientId = clients.size();
+            ClientHandler client = new ClientHandler(this, clientId, clientSocket, in, out);
             clients.add(client);
             client.start();
+            printToConsole("[Client " + clientId + " connected: " + clientSocket.getInetAddress() + ":"
+                    + clientSocket.getPort() + "]");
         }
     }
 
@@ -51,8 +69,41 @@ public class JokeServer {
         serverSocket.close();
     }
 
+    public void disconnectClient(int clientId) throws Exception {
+        // update observers
+        for (Runnable listener : disconnectListeners) {
+            listener.run();
+        }
+        ClientHandler client = clients.get(clientId);
+        printToConsole("[Client " + clientId + " disconnected: " + client.getSocket().getInetAddress() + ":"
+                + client.getSocket().getPort() + "]");
+        client.stopHandler();
+        clients.remove(clientId);
+    }
+
+    private void printToConsole(String msg) {
+        System.out.println(msg);
+        consoleLog.add(msg);
+    }
+
     public String getRandomJoke() {
         int randomIndex = (int) (Math.random() * JOKE_STRINGS.length);
         return JOKE_STRINGS[randomIndex];
+    }
+
+    /**
+     * Reads public IP address of the server by checking
+     * amazon's webpage.
+     * 
+     * @return
+     * @throws IOException
+     */
+    public String getPublicIPAddress() throws IOException {
+        // Credit: https://www.baeldung.com/java-get-ip-address
+        String urlString = "http://checkip.amazonaws.com/";
+        URL url = new URL(urlString);
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))) {
+            return br.readLine();
+        }
     }
 }
