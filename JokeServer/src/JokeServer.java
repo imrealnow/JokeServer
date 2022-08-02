@@ -25,7 +25,12 @@ public class JokeServer {
         serverSocket = new ServerSocket(port);
     }
 
-    public void listenForClients() throws Exception {
+    /**
+     * Listens for clients and creates a new thread for each one.
+     * 
+     * @throws IOException if an I/O error occurs when waiting for a connection.
+     */
+    public void listenForClients() throws IOException {
         running = true;
         while (running) {
             Socket clientSocket = serverSocket.accept();

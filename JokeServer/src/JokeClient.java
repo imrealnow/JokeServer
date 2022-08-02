@@ -85,6 +85,15 @@ public class JokeClient {
         running = false;
     }
 
+    /**
+     * Starts a connection to the server.
+     * 
+     * @param host the server's hostname
+     * @param port the server's port number
+     * @throws IOException              if the connection fails
+     * @throws IllegalArgumentException if the port number is invalid
+     * @throws UnknownHostException     if the hostname is invalid
+     */
     public void startConnection(String host, int port)
             throws UnknownHostException, IOException, IllegalArgumentException {
         clientSocket = new Socket(host, port);
@@ -92,14 +101,26 @@ public class JokeClient {
         clientInput = new DataOutputStream(clientSocket.getOutputStream());
     }
 
-    public String sendMessage(String msg) throws Exception {
+    /**
+     * Sends a message to the server, receives and then returns the response.
+     * 
+     * @param msg the message to send to the server
+     * @return the response from the server
+     */
+    public String sendMessage(String msg) throws IOException {
         clientInput.writeUTF(msg);
         String response = serverOutput.readUTF();
         System.out.println(response);
         return response;
     }
 
-    public String readMessage() throws Exception {
+    /**
+     * Reads current server output and returns it.
+     * 
+     * @return current server output
+     * @throws IOException Data stream has been closed
+     */
+    public String readMessage() throws IOException {
         String response = serverOutput.readUTF();
         System.out.println(response);
         return response;
