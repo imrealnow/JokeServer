@@ -16,6 +16,7 @@ public class JokeServer {
     List<String> consoleLog = new ArrayList<String>();
     List<Runnable> disconnectListeners = new ArrayList<Runnable>();
     boolean running = false;
+    int clientCount;
 
     public static void main(String[] args) throws Exception {
         JokeServer server = new JokeServer();
@@ -51,7 +52,7 @@ public class JokeServer {
             Socket clientSocket = serverSocket.accept();
             DataInputStream in = new DataInputStream(clientSocket.getInputStream());
             DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream());
-            int clientId = clients.size();
+            int clientId = clientCount++;
             ClientHandler client = new ClientHandler(this, clientId, clientSocket, in, out);
             clients.add(client);
             client.start();
@@ -74,11 +75,17 @@ public class JokeServer {
         for (Runnable listener : disconnectListeners) {
             listener.run();
         }
-        ClientHandler client = clients.get(clientId);
-        printToConsole("[Client " + clientId + " disconnected: " + client.getSocket().getInetAddress() + ":"
-                + client.getSocket().getPort() + "]");
-        client.stopHandler();
-        clients.remove(clientId);
+        ClientHandler client;
+        for (int i = 0; i < clients.size(); i++) {
+            client = clients.get(i);
+            if (client.getId() == clientId) {
+                printToConsole("[Client " + clientId + " disconnected: " + client.getSocket().getInetAddress() + ":"
+                        + client.getSocket().getPort() + "]");
+                clients.remove(i);
+                client.stopHandler();
+                break;
+            }
+        }
     }
 
     private void printToConsole(String msg) {

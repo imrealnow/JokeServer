@@ -18,6 +18,10 @@ public class ClientHandler extends Thread {
         this.out = out;
     }
 
+    public int getClientId() {
+        return clientId;
+    }
+
     public Socket getSocket() {
         return clientSocket;
     }
