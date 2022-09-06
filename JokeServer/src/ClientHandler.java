@@ -29,8 +29,14 @@ public class ClientHandler extends Thread {
     @Override
     public void run() {
         // welcome message
+        String localIp;
+        try {
+            localIp = (InetAddress.getLocalHost().getHostAddress());
+        } catch (UnknownHostException e) {
+            localIp = "(Couldn't retrieve local IP address)";
+        }
         String message = "[Client: " + clientId + "] has connected to Joke Server["
-                + server.serverSocket.getInetAddress().getHostAddress() + ":" + server.serverSocket.getLocalPort()
+                + localIp + ":" + server.serverSocket.getLocalPort()
                 + "]";
         while (running) {
             try {
