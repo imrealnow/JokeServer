@@ -20,7 +20,12 @@ public class JokeServer {
 
     public static void main(String[] args) throws Exception {
         JokeServer server = new JokeServer();
-        server.start("localhost", PORT);
+        try {
+            server.start("localhost", Integer.parseInt(args[0]));
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid port number, using default port: " + PORT);
+            server.start("localhost", PORT);
+        }
         server.listenForClients();
     }
 
