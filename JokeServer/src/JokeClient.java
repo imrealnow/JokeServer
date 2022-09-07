@@ -18,7 +18,15 @@ public class JokeClient {
 
     public static void main(String[] args) throws Exception {
         JokeClient client = new JokeClient();
-        client.attemptConnection(args[0], Integer.parseInt(args[1]));
+        try {
+            client.attemptConnection(args[0], Integer.parseInt(args[1]));
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid port number, using default port: " + JokeServer.PORT);
+            client.attemptConnection(args[0], JokeServer.PORT);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.out.println("Invalid runtime parameters, closing connection..." + JokeServer.PORT);
+            client.attemptConnection("localhost", JokeServer.PORT);
+        }
         client.run();
     }
 
